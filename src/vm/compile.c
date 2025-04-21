@@ -34,9 +34,21 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
         debugAssert(block->op_lifetime_array != NULL, "Block op lifetime array is null!", NULL);
     )
 
+    // Holds the degree of each operation.
+    // Used to determine register placement.
     u16 block_op_degree_array[block_op_array_elements];
 
-    // Zero out array so starting degrees can be accurate
+    // Holds which op lives the furthest after the given index.
+    // Used to determine live registers to spill.
+    u16 block_op_furthest_life_array[block_op_array_elements];
+
+    // To store the function itself
+    // Temp solution, will replace later.
+    u32 function_memory[256];
+
+    /* Calculate operation degrees. */
+
+    // Zero out array so starting degrees can be accurate.
     memset(block_op_degree_array, 0, block_op_array_elements * sizeof(u16));
 
     for (usize i = 0; i < block_op_array_elements; ++i) {
@@ -55,15 +67,33 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
         // Died so young...
     }
 
-    sc_printf("Degrees:\n");
-    for (usize i = 0; i < block_op_array_elements; ++i) {
-        sc_printf("%d\n", block_op_degree_array[i]);
+    /* Calculate longest lifetimes at each index. */
+
+    block_op_furthest_life_array[0] = 0;
+
+    {
+        // Only needed for this calculation.
+        u16 current_furthest_life = 0;
+
+        for (usize i = 1; i < block_op_array_elements; ++i) {
+            // All ones if true, all zeros if false.
+            usize mask = !(block->op_lifetime_array[current_furthest_life] < block->op_lifetime_array[i]) - 1;
+
+            // If condition is true, set the current op as having a longer lifetime than the previous furthest.
+            current_furthest_life = (i & mask) | (current_furthest_life & ~mask);
+            
+            // Add resulting index to array.
+            block_op_furthest_life_array[i] = current_furthest_life;
+
+        }        
     }
 
-    // To store the function itself
-    // Temp solution, will replace later.
-    u32 function_memory[256];
+    sc_printf("Furthest Lifetimes:\n");
+    for (usize i = 0; i < block_op_array_elements; ++i) {
+        sc_printf("[%zd]: %d\n", i, block_op_furthest_life_array[i]);
+    }
 
+    /* Compile the function itself. */
     ScirOp *op_array = block->op_array;
 
     usize current_function = 0;
@@ -103,7 +133,7 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
                 u16 operand_degrees[2] = {block_op_degree_array[use_array[0]], block_op_degree_array[use_array[1]]};
 
                 function_memory[current_function] = emitMipsADD(9 + block_op_degree_array[i], 9 + operand_degrees[0], 9 + operand_degrees[1]);
-                current_function ++;
+                current_function++;
 
                 continue;
             }
@@ -116,10 +146,6 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
     function_memory[current_function + 1] = 0;
 
     current_function += 2;
-
-    for (usize i = 0; i < (current_function); ++i) {
-        sc_printf("%08x\n", function_memory[i]);
-    }
 
     #ifdef SC_PLATFORM_PSP_OPTION_
 
