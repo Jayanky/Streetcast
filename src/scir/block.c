@@ -27,52 +27,6 @@ ScirBlock scirBlockAllocate(AllocateBuffer *buffer, usize op_array_capacity, usi
     };
 }
 
-void scirBlockOpDegreeDetermine(ScirBlock *block, AllocateBuffer *buffer, u16 block_op_array_elements) {
-    debugBlock(
-        debugAssert(block != NULL, "Block is null!", NULL);
-        debugAssert(buffer != NULL, "Buffer is null!", NULL);
-        debugAssert((uptr)buffer % 2 == 0, "Buffer not aligned to a 2 byte boundary!", NULL);
-        debugAssert(buffer->base != NULL, "Buffer base is null!", NULL);    
-        debugAssert(
-            buffer->capacity >= (block_op_array_elements * 2), 
-            "Buffer capacity of %zd bytes is too small for required capacity of %d bytes!", 
-            buffer->capacity, block_op_array_elements * 2
-        );
-    )
-
-    memset(buffer->base, 0, buffer->capacity);
-
-    // Store all register allocation indices
-    u16 *block_op_degree_array = (u16*)buffer->base;
-
-    // First op always takes register 0
-    block_op_degree_array[0] = 0;
-
-    for (usize i = 0; i < block_op_array_elements; ++i) {
-        // The (max) number of operations this operation interferes with.
-        u16 op_lifetime = block->op_lifetime_array[i] - i;
-
-        // Type and degree, which are used to determine if operations within the lifetime interfere.
-        ScirOpType op_type = (block->op_array[i].code & 0x3800);
-        u16 op_degree = block_op_degree_array[i]; 
-
-        // Bump the register index for each interfering operation.
-        // (> 1) and (i - 1) are to prevent incrementing the current op and the last op in the lifetime.
-        while (op_lifetime > 1) {
-            usize compare_op_index = (i - 1) + op_lifetime;
-
-            // Different types use different register sets, so they don't interfere.
-            u16 compare_op_type = block->op_array[i].code & 0x3800;
-            u16 *compare_op_degree = block_op_degree_array + compare_op_index;
-
-            *compare_op_degree += (*compare_op_degree >= op_degree) && (compare_op_type == op_type);
-            
-            op_lifetime--;
-        }
-        // Died so young...
-    }
-}
-
 u16 scirBlockOpAppend(ScirBlockAppendState *state, ScirOpCode code, u16 *use_array, u16 use_array_elements) {
     debugBlock(
         debugAssert(state != NULL, "State is null!", NULL);

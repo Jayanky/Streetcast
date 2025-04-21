@@ -1,16 +1,15 @@
-#ifndef STREETCAST_COMMON_H_
-#define STREETCAST_COMMON_H_
+#ifndef SC_COMMON_H_
+#define SC_COMMON_H_
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef STREETCAST_PLATFORM_PSP_OPTION_
+#ifdef SC_PLATFORM_PSP_OPTION_
 
 #include <pspkernel.h>
 #include <pspdebug.h>

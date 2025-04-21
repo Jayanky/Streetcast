@@ -1,5 +1,5 @@
-#ifndef STREETCAST_ALLOCATE_H_
-#define STREETCAST_ALLOCATE_H_
+#ifndef SC_ALLOCATE_H_
+#define SC_ALLOCATE_H_
 
 #include <common.h>
 

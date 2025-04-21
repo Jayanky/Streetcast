@@ -1,25 +1,15 @@
-#ifndef STREETCAST_SCIR_H_
-#define STREETCAST_SCIR_H_
+#ifndef SC_SCIR_H_
+#define SC_SCIR_H_
 
 #include <common.h>
 #include <allocate.h>
 
 typedef enum {
-    SCIR_OP_WIDTH_8 = 0x4000,
-    SCIR_OP_WIDTH_16 = 0x8000,
-    SCIR_OP_WIDTH_32 = 0xC000,
+    SCIR_OP_WIDTH_8 = 0x0000,
+    SCIR_OP_WIDTH_16 = 0x4000,
+    SCIR_OP_WIDTH_32 = 0x8000,
+    SCIR_OP_WIDTH_64 = 0xC000,
 } ScirOpWidth;
-
-typedef enum {
-    SCIR_OP_TYPE_GENERAL = 0x0000,
-    SCIR_OP_TYPE_FLOAT = 0x0800,
-    SCIR_OP_TYPE_IMPL0 = 0x1000,
-    SCIR_OP_TYPE_IMPL1 = 0x1800,
-    SCIR_OP_TYPE_IMPL2 = 0x2000,
-    SCIR_OP_TYPE_IMPL3 = 0x2800,
-    SCIR_OP_TYPE_IMPL4 = 0x3000,
-    SCIR_OP_TYPE_IMPL5 = 0x3800,
-} ScirOpType;
 
 typedef enum {
     SCIR_OP_CODE_LOAD,
@@ -75,7 +65,7 @@ inline void scirBlockAppendStateReset(ScirBlockAppendState *state) {
 }
 
 /* Get the number of operations in the block bound to `state` */
-inline usize scirBlockAppendStateOpCount(ScirBlockAppendState *state) {
+inline usize scirBlockAppendStateOpElements(ScirBlockAppendState *state) {
     return state->op_array_position - state->block->op_array;
 }
 
@@ -83,17 +73,17 @@ inline usize scirBlockAppendStateOpCount(ScirBlockAppendState *state) {
     Get the number operation lifetimes in the block bound to `state`.
     This number should be the same as the operation count.
 */
-inline usize scirBlockAppendStateOpLifetimeCount(ScirBlockAppendState *state) {
+inline usize scirBlockAppendStateOpLifetimeElements(ScirBlockAppendState *state) {
     return state->op_lifetime_array_position - state->block->op_lifetime_array;
 }
 
 /* Get the number of uses in the block bound to `state` */
-inline usize scirBlockAppendStateUseCount(ScirBlockAppendState *state) {
+inline usize scirBlockAppendStateUseElements(ScirBlockAppendState *state) {
     return state->use_array_position - state->block->use_array;
 }
 
 /* Get the number of constants in the block bound to `state` */
-inline usize scirBlockAppendStateConstCount(ScirBlockAppendState *state) {
+inline usize scirBlockAppendStateConstElements(ScirBlockAppendState *state) {
     return state->const_array_position - state->block->const_array;
 }
 

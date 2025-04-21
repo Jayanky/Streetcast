@@ -5,10 +5,15 @@ project(Streetcast
     DESCRIPTION "Dreamcast emulator."
 )
 
+# For language servers like clangd.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(SC_SCIR_BLOCK_MAX_OPS 128 CACHE STRING "Max allowed Scir Ops. Decrease to reduce memory usage.")
+
 set(SC_ALLOCATION_SIZE 65536 CACHE STRING "The number of allocated bytes for program processes.")
+
 set(SC_PLATFORM "NATIVE" CACHE STRING "Platform to build for.")
+
 option(SC_RELEASE "Enable release build" OFF)
 
 if(SC_PLATFORM STREQUAL "PSP")
@@ -37,13 +42,14 @@ target_include_directories(${CMAKE_PROJECT_NAME}
 
 target_compile_definitions(${CMAKE_PROJECT_NAME}
     PRIVATE
-    STREETCAST_ALLOCATION_SIZE_INT_OPTION_=${SC_ALLOCATION_SIZE}
+    SC_ALLOCATION_SIZE_INT_=${SC_ALLOCATION_SIZE}
+    SC_SCIR_BLOCK_MAX_OPS_INT_=${SC_SCIR_BLOCK_MAX_OPS}
 )
 
 if(NOT SC_RELEASE)
     target_compile_definitions(${CMAKE_PROJECT_NAME}
         PRIVATE
-        STREETCAST_DEBUG_BOOL_OPTION_
+        SC_DEBUG_BOOL_OPTION_
     )
 endif()
 
@@ -56,8 +62,8 @@ if(SC_PLATFORM STREQUAL "PSP")
     target_compile_definitions(
         ${CMAKE_PROJECT_NAME}
         PUBLIC
-        STREETCAST_PLATFORM_PSP_OPTION_
-        STREETCAST_ARCH_MIPS_ALLEGREX_OPTION_
+        SC_PLATFORM_PSP_OPTION_
+        SC_ARCH_MIPS_ALLEGREX_OPTION_
     )
 
     target_link_libraries(
@@ -74,6 +80,6 @@ if(SC_PLATFORM STREQUAL "PSP")
         BACKGROUND_PATH NULL
         PREVIEW_PATH NULL
         TITLE ${CMAKE_PROJECT_NAME}
-        VERSION 01.00
+        VERSION 00.01
     )
 endif()

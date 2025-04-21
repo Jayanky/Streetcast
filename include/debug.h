@@ -1,9 +1,9 @@
-#ifndef STREETCAST_DEBUG_H_
-#define STREETCAST_DEBUG_H_
+#ifndef SC_DEBUG_H_
+#define SC_DEBUG_H_
 
 #include <common.h>
 
-#ifdef STREETCAST_DEBUG_BOOL_OPTION_
+#ifdef SC_DEBUG_BOOL_OPTION_
 
 #define debugBlock(statement) do { statement } while(0);
 
