@@ -2,10 +2,9 @@
 #include <allocate.h>
 #include <scir.h>
 #include <debug.h>
+#include <defines.h>
 
-typedef i32 (*VmFunc)();
-
-static u8 vm_dreamcast_memory[16777216 + 8388608 + 2097152];     // 26 MiB, for emulated games
+typedef void (*VmFunc)();
 
 // I've tried my best and I still only have a vague idea of what this cache stuff actually does.
 // But it does indeed.
@@ -64,37 +63,43 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
     // To store the function itself
     // Temp solution, will replace later.
     u32 function_memory[256];
-    u32 immediate_memory[128];
-
-    sc_printf("Immediate Memory:\n%p\n", immediate_memory);
 
     ScirOp *op_array = block->op_array;
 
     usize current_function = 0;
 
-    // Currently just loads the base of the immediate array for the function to use in $t0.
-    function_memory[current_function] = 0b001111 << 26 | 0 << 21 | 8 << 16 | (((uptr)immediate_memory >> 16) & 0xFFFF);
-    function_memory[current_function + 1] = 0b001101 << 26 | 8 << 21 | 8 << 16 | ((uptr)immediate_memory & 0xFFFF);
-
-    current_function += 2;
-
     for (usize i = 0, imm = 0; i < block_op_array_elements; ++i) {
         ScirOp op = op_array[i];
+        u16 *use_array = block->use_array + op.use_array;
 
         switch ((ScirOpCode)(op.code & ~0xF800)) {
             case SCIR_OP_CODE_IMMLOAD: {
-                u16 const_array_index = (block->use_array + op.use_array)[0];
-                immediate_memory[imm] = block->const_array[const_array_index];
-                sc_printf("immediate_memory[%zd], %i\n", imm, immediate_memory[imm]);
+                u32 const_value = block->const_array[use_array[0]];
 
-                function_memory[current_function] = 0b100011 << 26 | 8 << 21 | (9 + block_op_degree_array[i]) << 16 | imm << 2;
-
-                current_function++;
+                if (const_value <= 0xFFFF) {
+                    function_memory[current_function] = 0b001101 << 26 | 0 << 21 | (9 + block_op_degree_array[i]) << 16 | const_value;
+                    current_function++;
+                } else {
+                    function_memory[current_function] = 0b001111 << 26 | 0 << 21 | 1 << 16 | const_value >> 16;
+                    function_memory[current_function + 1] = 0b001101 << 26 | 1 << 21 | (9 + block_op_degree_array[i]) << 16 | (const_value & 0xFFFF);
+                    current_function += 2;
+                }
+                
                 imm++;
                 continue;
             }
+            case SCIR_OP_CODE_STORE: {
+                u32 const_value = block->const_array[use_array[0]];
+                u16 operand_degrees[2] = {block_op_degree_array[use_array[1]], block_op_degree_array[use_array[2]]};
+
+                if (const_value <= 0xFFFF) {
+                    function_memory[current_function] = 0b101011 << 26 | (9 + operand_degrees[0]) << 21 | (9 + operand_degrees[1]) << 16 | const_value;
+                    current_function++;
+                }
+
+                continue;
+            }
             case SCIR_OP_CODE_ADDI: {
-                u16 *use_array = (block->use_array + op.use_array);
                 u16 operand_degrees[2] = {block_op_degree_array[use_array[0]], block_op_degree_array[use_array[1]]};
 
                 function_memory[current_function] = 0b000000 << 26 
@@ -105,8 +110,8 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
                 | 0b100000;
 
                 // Dumb way of seeing the result of the last add (ADDIU $v0, [add_register], 0).
-                function_memory[current_function + 1] = 0b001001 << 26 | (9 + block_op_degree_array[i]) << 21 | 2 << 16 | 0;
-                current_function += 2;
+                // function_memory[current_function + 1] = 0b001001 << 26 | (9 + block_op_degree_array[i]) << 21 | 2 << 16 | 0;
+                current_function ++;
 
                 continue;
             }
@@ -127,9 +132,7 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
     #ifdef SC_PLATFORM_PSP_OPTION_
 
     vmCompileExecutableSet((uptr)function_memory, (uptr)function_memory + sizeof(function_memory));
-    i32 val = ((VmFunc)&function_memory[0])();
-
-    sc_printf("val:\n%i\n", val);
+    ((VmFunc)function_memory)();
 
     #endif
 }

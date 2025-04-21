@@ -5,6 +5,7 @@
 #include <vm.h>
 
 // We don't need malloc where we're going.
+static u8 main_dreamcast_memory[SC_DC_MEMORY_SIZE_INT_];     // 26 MiB, for emulated games
 static u8 main_scir_block_memory[SC_SCIR_BLOCK_SIZE_INT_]; // For holding IR during compilation
 
 #ifdef SC_PLATFORM_PSP_OPTION_
@@ -52,12 +53,14 @@ int main() {
     ScirBlock scir_block = scirBlockAllocate(&scir_block_buffer, SC_SCIR_BLOCK_OP_ARRAY_SIZE_INT_, SC_SCIR_BLOCK_USE_ARRAY_SIZE_INT_, SC_SCIR_BLOCK_CONST_ARRAY_SIZE_INT_);
     ScirBlockAppendState scir_state = scirBlockAppendStateBind(&scir_block);
 
-    u16 const_offset0 = scirBlockConstAppend(&scir_state, (u32[]){3, 8, 12}, 3);
-    u16 op_offset0 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD |  SCIR_OP_WIDTH_32, (u16[]){const_offset0}, 1);
-    u16 op_offset1 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD |  SCIR_OP_WIDTH_32, (u16[]){const_offset0 + 1}, 1);
-    u16 op_offset2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD | SCIR_OP_WIDTH_32, (u16[]){const_offset0 + 2}, 1);
+    u16 const_offset0 = scirBlockConstAppend(&scir_state, (u32[]){(uptr)&main_dreamcast_memory, 8, 12, 3, 0}, 5);
+    u16 op_offset0 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0 + 1}, 1);
+    u16 op_offset1 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0 + 2}, 1);
+    u16 op_offset2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0 + 3}, 1);
     u16 op_offset3 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op_offset0, op_offset1}, 2);
-    scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op_offset2, op_offset3}, 2);     
+    u16 op_offset4 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op_offset2, op_offset3}, 2);
+    u16 op_offset5 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0}, 1); 
+    scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE | SCIR_OP_WIDTH_32, (u16[]){const_offset0 + 4, op_offset5, op_offset4}, 3);
 
     const u16 op_count = scirBlockAppendStateOpElements(&scir_state);
 
@@ -67,6 +70,8 @@ int main() {
     }
 
     vmScirBlockCompile(&scir_block, op_count);
+
+    sc_printf("main_dreamcast_memory[0]\n%d\n", ((u32*)main_dreamcast_memory)[0]);
 
     #ifdef SC_PLATFORM_PSP_OPTION_
 
