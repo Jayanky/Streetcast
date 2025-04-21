@@ -94,12 +94,6 @@ inline usize scirBlockAppendStateConstElements(ScirBlockAppendState *state) {
 ScirBlock scirBlockAllocate(AllocateBuffer *buffer, usize op_array_size, usize use_array_size, usize const_array_size);
 
 /*
-    Determine the degree that each operation in `block` occupies, and place the results in `buffer`.
-    `block_op_array_elements` should be set to the number of operations in `block`.
-*/
-void scirBlockOpDegreeDetermine(ScirBlock *block, AllocateBuffer *buffer, u16 block_op_array_elements);
-
-/*
     Append an operation with the code `code` and `use_array_elements` elements in `use_array` to the block bound to `state`.
 */
 u16 scirBlockOpAppend(ScirBlockAppendState *state, ScirOpCode code, u16 *use_array, u16 use_array_elements);
