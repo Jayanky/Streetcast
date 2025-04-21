@@ -10,8 +10,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SC_SCIR_BLOCK_MAX_OPS 128 CACHE STRING "Max allowed Scir Ops. Decrease to reduce memory usage.")
 
-set(SC_ALLOCATION_SIZE 65536 CACHE STRING "The number of allocated bytes for program processes.")
-
 set(SC_PLATFORM "NATIVE" CACHE STRING "Platform to build for.")
 
 option(SC_RELEASE "Enable release build" OFF)
@@ -42,7 +40,6 @@ target_include_directories(${CMAKE_PROJECT_NAME}
 
 target_compile_definitions(${CMAKE_PROJECT_NAME}
     PRIVATE
-    SC_ALLOCATION_SIZE_INT_=${SC_ALLOCATION_SIZE}
     SC_SCIR_BLOCK_MAX_OPS_INT_=${SC_SCIR_BLOCK_MAX_OPS}
 )
 

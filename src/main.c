@@ -54,12 +54,12 @@ int main() {
     ScirBlockAppendState scir_state = scirBlockAppendStateBind(&scir_block);
 
     u16 const_offset0 = scirBlockConstAppend(&scir_state, (u32[]){(uptr)&main_dreamcast_memory, 8, 12, 3, 0}, 5);
-    u16 op_offset0 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0 + 1}, 1);
-    u16 op_offset1 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0 + 2}, 1);
-    u16 op_offset2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0 + 3}, 1);
+    u16 op_offset0 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMM, (u16[]){const_offset0 + 1}, 1);
+    u16 op_offset1 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMM, (u16[]){const_offset0 + 2}, 1);
+    u16 op_offset2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMM, (u16[]){const_offset0 + 3}, 1);
     u16 op_offset3 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op_offset0, op_offset1}, 2);
     u16 op_offset4 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op_offset2, op_offset3}, 2);
-    u16 op_offset5 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_IMMLOAD, (u16[]){const_offset0}, 1); 
+    u16 op_offset5 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMM, (u16[]){const_offset0}, 1); 
     scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE | SCIR_OP_WIDTH_32, (u16[]){const_offset0 + 4, op_offset5, op_offset4}, 3);
 
     const u16 op_count = scirBlockAppendStateOpElements(&scir_state);

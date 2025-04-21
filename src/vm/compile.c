@@ -3,6 +3,7 @@
 #include <scir.h>
 #include <debug.h>
 #include <defines.h>
+#include <emit/mips.h>
 
 typedef void (*VmFunc)();
 
@@ -73,15 +74,15 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
         u16 *use_array = block->use_array + op.use_array;
 
         switch ((ScirOpCode)(op.code & ~0xF800)) {
-            case SCIR_OP_CODE_IMMLOAD: {
+            case SCIR_OP_CODE_LOADIMM: {
                 u32 const_value = block->const_array[use_array[0]];
 
                 if (const_value <= 0xFFFF) {
-                    function_memory[current_function] = 0b001101 << 26 | 0 << 21 | (9 + block_op_degree_array[i]) << 16 | const_value;
+                    function_memory[current_function] = emitMipsORI(9 + block_op_degree_array[i], 0, const_value);
                     current_function++;
                 } else {
-                    function_memory[current_function] = 0b001111 << 26 | 0 << 21 | 1 << 16 | const_value >> 16;
-                    function_memory[current_function + 1] = 0b001101 << 26 | 1 << 21 | (9 + block_op_degree_array[i]) << 16 | (const_value & 0xFFFF);
+                    function_memory[current_function] = emitMipsLUI(1, const_value >> 16);
+                    function_memory[current_function + 1] = emitMipsORI(9 + block_op_degree_array[i], 1, const_value & 0xFFFF);
                     current_function += 2;
                 }
                 
@@ -93,7 +94,7 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
                 u16 operand_degrees[2] = {block_op_degree_array[use_array[1]], block_op_degree_array[use_array[2]]};
 
                 if (const_value <= 0xFFFF) {
-                    function_memory[current_function] = 0b101011 << 26 | (9 + operand_degrees[0]) << 21 | (9 + operand_degrees[1]) << 16 | const_value;
+                    function_memory[current_function] = emitMipsSW(9 + operand_degrees[1], const_value, 9 + operand_degrees[0]);
                     current_function++;
                 }
 
@@ -102,15 +103,7 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
             case SCIR_OP_CODE_ADDI: {
                 u16 operand_degrees[2] = {block_op_degree_array[use_array[0]], block_op_degree_array[use_array[1]]};
 
-                function_memory[current_function] = 0b000000 << 26 
-                | (9 + operand_degrees[0]) << 21 
-                | (9 + operand_degrees[1]) << 16 
-                | (9 + block_op_degree_array[i]) << 11 
-                | 0 << 6
-                | 0b100000;
-
-                // Dumb way of seeing the result of the last add (ADDIU $v0, [add_register], 0).
-                // function_memory[current_function + 1] = 0b001001 << 26 | (9 + block_op_degree_array[i]) << 21 | 2 << 16 | 0;
+                function_memory[current_function] = emitMipsADD(9 + block_op_degree_array[i], 9 + operand_degrees[0], 9 + operand_degrees[1]);
                 current_function ++;
 
                 continue;
@@ -120,7 +113,7 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
         }
     }
 
-    function_memory[current_function] = 0b000000 << 26 | 31 << 21 | 0 << 6 | 0b001000;
+    function_memory[current_function] = emitMipsJR(31);
     function_memory[current_function + 1] = 0;
 
     current_function += 2;
