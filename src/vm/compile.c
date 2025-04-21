@@ -45,7 +45,6 @@ void vmScirBlockCompile(ScirBlock *block, u16 block_op_array_elements) {
         usize compare_op_index = block->op_lifetime_array[i] - 1;
         
         // Bump the register index for each interfering operation.
-        // (> 1) and (i - 1) are to prevent incrementing the current op and the last op in the lifetime.
         while (compare_op_index > i) {
             // Different types use different register sets, so they don't interfere.
             u16 *compare_op_degree = block_op_degree_array + compare_op_index;
