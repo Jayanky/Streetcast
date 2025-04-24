@@ -21,6 +21,7 @@
 *.a
 *.la
 *.lo
+*.prx
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -35,6 +36,7 @@
 *.i*86
 *.x86_64
 *.hex
+eboot.pbp
 
 # Debug files
 *.dSYM/
@@ -50,3 +52,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Language Server Configuration
+.clangd
