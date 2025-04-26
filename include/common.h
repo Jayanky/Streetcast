@@ -39,4 +39,11 @@ typedef double f64;
 typedef size_t usize;
 typedef uintptr_t uptr;
 
+/*
+    Creates a mask of zeros if condition is false, or ones if true.
+*/
+static inline usize scConditionBitmask(bool condition) {
+    return !condition - 1;
+}
+
 #endif
