@@ -16,7 +16,7 @@ typedef struct {
 /*
     Creates and initializes a new Bump State with `buffer` bound to it.
 */
-inline AllocateBumpState allocateBufferBumpStateBind(AllocateBuffer *buffer) {
+static inline AllocateBumpState allocateBufferBumpStateBind(AllocateBuffer *buffer) {
     return (AllocateBumpState){
         .buffer = buffer,
         .position = buffer->base + buffer->capacity,
@@ -27,7 +27,7 @@ inline AllocateBumpState allocateBufferBumpStateBind(AllocateBuffer *buffer) {
     Reset `state` to initial conditions.
     Effectively clears the bound buffer for reuse, though it doesn't zero out elements.
 */
-inline void allocateBumpStateReset(AllocateBumpState *state) {
+static inline void allocateBumpStateReset(AllocateBumpState *state) {
     state->position = state->buffer->base + state->buffer->capacity;
 }
 
