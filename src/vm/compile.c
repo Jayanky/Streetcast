@@ -11,6 +11,7 @@ typedef struct {
     u32 *function_memory;
     u16 *op_register_assignments;
     u16 *op_stack_assignments;
+    u16 *save_register_stack_assignments;
     usize *current_instruction;
     usize *stack_offset;
 } VmCompileState;
@@ -117,6 +118,13 @@ static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_
         usize s0_base_register_mask = scConditionBitmask(s0_base_condition);
 
         state->op_register_assignments[op_index] = op_degree + ((8 & t0_base_register_mask) | (24 & t8_base_register_mask) | (16 & s0_base_register_mask));
+
+        if (s0_base_condition) {
+            state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[op_index], *state->stack_offset, 30);
+            state->save_register_stack_assignments[state->op_register_assignments[op_index] - 16] = *state->stack_offset;
+            *state->stack_offset += 4;
+            *state->current_instruction += 1;
+        }
     } else {
         u16 spilled_op_register = state->op_register_assignments[spilled_op];
 
@@ -165,13 +173,17 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
         sc_printf("%d\n", op_degree_array[op_reordered_array[i]]);
     }
 
+    const usize save_register_count = 8;
+
     u32 function_memory[256];
     u16 op_register_assignments[op_code_array_elements];
     u16 op_stack_assignments[op_code_array_elements];
+    u16 save_register_stack_assignments[save_register_count]; // $s0 through $s7 must be returned by the end of the function.
     u16 degree_operation_indices[op_code_array_elements];
 
     memset(op_register_assignments, SC_VM_UNDEFINED_, sizeof(op_register_assignments));
     memset(op_stack_assignments, SC_VM_UNDEFINED_, sizeof(op_stack_assignments));
+    memset(save_register_stack_assignments, SC_VM_UNDEFINED_, sizeof(save_register_stack_assignments));
     memset(degree_operation_indices, SC_VM_UNDEFINED_, sizeof(degree_operation_indices));
 
     usize current_instruction = 0;
@@ -181,6 +193,7 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
         .function_memory = function_memory,
         .op_register_assignments = op_register_assignments,
         .op_stack_assignments = op_stack_assignments,
+        .save_register_stack_assignments = save_register_stack_assignments,
         .stack_offset = &stack_offset,
         .current_instruction = &current_instruction,
     };
@@ -237,6 +250,16 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
         }
     }
 
+    // Restore callee save registers if any were used.
+    for (usize i = 0, instruction_count = 0; i < save_register_count; i += 1) {
+        u16 stack_assignment = save_register_stack_assignments[i];
+        if (stack_assignment != SC_VM_UNDEFINED_) {
+            function_memory[current_instruction + instruction_count] = emitMipsLW(16 + i, stack_assignment, 30);
+        }
+    }
+
+    // Don't forget to return!
+    // Branch delay slot gets a NOP for now.
     function_memory[current_instruction] = emitMipsJR(31);
     function_memory[current_instruction + 1] = 0;
 
