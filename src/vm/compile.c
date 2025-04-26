@@ -173,10 +173,6 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
 
     function_memory[current_instruction] = emitMipsJR(31);
     function_memory[current_instruction + 1] = 0;
-    
-    for (usize i = 0; i < current_instruction; i += 1) {
-        sc_printf("[%3zd]: %08x\n", i, function_memory[i]);
-    }
 
     #ifdef SC_PLATFORM_PSP_OPTION_
 
