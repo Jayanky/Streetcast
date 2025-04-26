@@ -34,6 +34,8 @@ static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_ordered_index_
     u16 use_use_count = 0;
 
     for (usize i = 0; i < op_use_count; i += 1) {
+        op_highest_dependent_array[op_use_array[i]] = op_code_last_index;
+
         // Only assign a location if op has not already been located.
         if (op_ordered_index_array[op_use_array[i]] != (u16)-1) {
             continue;
@@ -41,26 +43,7 @@ static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_ordered_index_
 
         use_use_count = block->op_use_array_elements[op_use_array[i]];
 
-        if (use_use_count > 0) {
-            vmCompileScirBlockOpReorder(block, op_ordered_index_array, op_highest_dependent_array, op_use_array[i], op_code_order_start);
-        }
-    }
-
-    for (usize i = 0; i < op_use_count; i += 1) {
-        if (op_ordered_index_array[op_use_array[i]] != (u16)-1) {
-            continue;
-        }
-
-        use_use_count = block->op_use_array_elements[op_use_array[i]];
-
-        if (use_use_count == 0) {
-            vmCompileScirBlockOpReorder(block, op_ordered_index_array, op_highest_dependent_array, op_use_array[i], op_code_order_start);
-        }
-    }
-
-    for (usize i = 0; i < op_use_count; i += 1) {
-        // For some reason the loop this statement goes in matters.
-        op_highest_dependent_array[op_use_array[i]] = op_code_last_index;
+        vmCompileScirBlockOpReorder(block, op_ordered_index_array, op_highest_dependent_array, op_use_array[i], op_code_order_start);
     }
 
     op_ordered_index_array[op_code_last_index] = *op_code_order_start;
