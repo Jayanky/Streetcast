@@ -6,6 +6,7 @@
 
 typedef enum {
     EMIT_MIPS_OP_CODE_LUI = 0b001111,
+    EMIT_MIPS_OP_CODE_LW = 0b100011,
     EMIT_MIPS_OP_CODE_ORI = 0b001101,
     EMIT_MIPS_OP_CODE_SPECIAL = 0b000000,
     EMIT_MIPS_OP_CODE_SW = 0b101011,
@@ -53,6 +54,10 @@ static inline u32 emitMipsJR(u8 rs) {
 
 static inline u32 emitMipsLUI(u8 rt, u16 immediate) {
     return emitMipsFormatI(EMIT_MIPS_OP_CODE_LUI, 0, rt, immediate);
+}
+
+static inline u32 emitMipsLW(u8 rt, i16 offset, u8 base) {
+    return emitMipsFormatI(EMIT_MIPS_OP_CODE_LW, base, rt, (u16)offset);
 }
 
 static inline u32 emitMipsORI(u8 rt, u8 rs, u16 immediate) {
