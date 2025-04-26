@@ -41,8 +41,6 @@ static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_ordered_index_
             continue;
         }
 
-        use_use_count = block->op_use_array_elements[op_use_array[i]];
-
         vmCompileScirBlockOpReorder(block, op_ordered_index_array, op_highest_dependent_array, op_use_array[i], op_code_order_start);
     }
 
@@ -58,7 +56,7 @@ static void vmCompileDegreeCalculate(u16 *op_degree_array, u16 *op_index_order_a
         op_reordered_array[op_index_order_array[i]] = i;
     }
 
-    for (usize current_op_index = 0; current_op_index < op_code_array_elements; ++current_op_index) {
+    for (usize current_op_index = 0; current_op_index < op_code_array_elements; current_op_index += 1) {
         u16 current_op = op_reordered_array[current_op_index];
         u16 current_op_degree = op_degree_array[current_op];
         u16 compare_op_initial = op_highest_dependent_array[current_op];
