@@ -10,6 +10,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SC_SCIR_BLOCK_MAX_OPS 128 CACHE STRING "Max allowed Scir Ops. Decrease to reduce memory usage.")
 
+set(SC_SCIR_BLOCK_MAX_USES 256 CACHE STRING "Max allowed Scir Uses. Decrease to reduce memory usage.")
+
+set(SC_SCIR_BLOCK_MAX_CONSTS 128 CACHE STRING "Max allowed Scir Consts. Decrease to reduce memory usage.")
+
 set(SC_PLATFORM "NATIVE" CACHE STRING "Platform to build for.")
 
 option(SC_RELEASE "Enable release build" OFF)
@@ -22,6 +26,17 @@ endif()
 
 add_executable(${CMAKE_PROJECT_NAME})
 
+target_precompile_headers(${CMAKE_PROJECT_NAME}
+    PRIVATE
+    include/allocate.h
+    include/common.h
+    include/debug.h
+    include/defines.h
+    include/scir.h
+    include/vm.h
+    include/emit/mips.h
+)
+
 target_sources(${CMAKE_PROJECT_NAME}
     PRIVATE
     src/main.c
@@ -31,7 +46,7 @@ target_sources(${CMAKE_PROJECT_NAME}
 )
 
 target_compile_options(${CMAKE_PROJECT_NAME}
-    PRIVATE -O2 -std=c11 -Wextra -Werror
+    PRIVATE -std=c11 -Wextra -Werror -finline-functions
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME}
@@ -41,12 +56,22 @@ target_include_directories(${CMAKE_PROJECT_NAME}
 target_compile_definitions(${CMAKE_PROJECT_NAME}
     PRIVATE
     SC_SCIR_BLOCK_MAX_OPS_INT_=${SC_SCIR_BLOCK_MAX_OPS}
+    SC_SCIR_BLOCK_MAX_USES_INT_=${SC_SCIR_BLOCK_MAX_USES}
+    SC_SCIR_BLOCK_MAX_CONSTS_INT_=${SC_SCIR_BLOCK_MAX_CONSTS}
 )
 
 if(NOT SC_RELEASE)
     target_compile_definitions(${CMAKE_PROJECT_NAME}
         PRIVATE
         SC_DEBUG_BOOL_OPTION_
+    )
+
+    target_compile_options(${CMAKE_PROJECT_NAME}
+        PRIVATE -O2
+    )
+else()
+    target_compile_options(${CMAKE_PROJECT_NAME}
+        PRIVATE -O0 -g
     )
 endif()
 
