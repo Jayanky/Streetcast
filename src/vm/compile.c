@@ -261,10 +261,6 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
 
     current_instruction += 2;
 
-    for (usize i = 0; i < current_instruction; i += 1) {
-        sc_printf("[%3zd]: %08x\n", i, function_memory[i]);
-    }
-
     #ifdef SC_PLATFORM_PSP_OPTION_
 
     vmCompileExecutableSet((uptr)function_memory, (uptr)function_memory + sizeof(function_memory));
