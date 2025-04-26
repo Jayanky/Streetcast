@@ -101,15 +101,15 @@ int main() {
     u16 op36 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op6, op35}, 2, NULL, 0);
     u16 op37 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op7, op36}, 2, NULL, 0);
 
-    u16 op38 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op37}, 2, NULL, 0);
-    u16 op39 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op38}, 2, NULL, 0);
-    u16 op40 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op39}, 2, NULL, 0);
-    u16 op41 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op3, op40}, 2, NULL, 0);
+    u16 op38 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op8, op37}, 2, NULL, 0);
+    u16 op39 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op7, op38}, 2, NULL, 0);
+    u16 op40 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op6, op39}, 2, NULL, 0);
+    u16 op41 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op5, op40}, 2, NULL, 0);
     u16 op42 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op4, op41}, 2, NULL, 0);
-    u16 op43 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op5, op42}, 2, NULL, 0);
-    u16 op44 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op6, op43}, 2, NULL, 0);
-    u16 op45 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op7, op44}, 2, NULL, 0);
-    u16 op46 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op8, op45}, 2, NULL, 0);
+    u16 op43 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op3, op42}, 2, NULL, 0);
+    u16 op44 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op43}, 2, NULL, 0);
+    u16 op45 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op44}, 2, NULL, 0);
+    u16 op46 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op45}, 2, NULL, 0);
 
     u16 op47 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op46}, 1, (u32[]){(usize)main_dreamcast_memory}, 1);
 
