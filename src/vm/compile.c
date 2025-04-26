@@ -7,6 +7,14 @@
 
 typedef void (*VmFunc)();
 
+typedef struct {
+    u32 *function_memory;
+    u16 *op_register_assignments;
+    u16 *op_stack_assignments;
+    usize *current_instruction;
+    usize *stack_offset;
+} VmCompileState;
+
 // I've tried my best and I still only have a vague idea of what this cache stuff actually does.
 // But it does indeed.
 static inline void vmCompileExecutableSet(uptr address_start, uptr address_end) {
@@ -75,8 +83,59 @@ static void vmCompileDegreeCalculate(u16 *op_degree_array, u16 *op_index_order_a
     }
 }
 
+static u16 vmCompileUseRegisterFetch(VmCompileState *state, u16 use_op_index, u16 spilled_op_index) {
+    u16 op_register_assignment = state->op_register_assignments[use_op_index];
+
+    if (op_register_assignment != SC_VM_UNDEFINED_) {
+        return op_register_assignment;
+    } else {
+        u16 use_op_stack = state->op_stack_assignments[use_op_index];
+        u16 spilled_op_register = state->op_register_assignments[spilled_op_index];
+
+        state->op_stack_assignments[use_op_index] = spilled_op_register;
+        state->op_register_assignments[spilled_op_index] = use_op_stack;
+
+        state->function_memory[*state->current_instruction] = emitMipsADD(1, spilled_op_register, 0);
+        state->function_memory[*state->current_instruction + 1] = emitMipsLW(spilled_op_register, use_op_stack, 30);
+        state->function_memory[*state->current_instruction + 2] = emitMipsSW(1, use_op_stack, 30);
+
+        *state->current_instruction += 3;
+
+        return spilled_op_register;
+    }
+}
+
+static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_degree, u16 spilled_op) {
+    // Assigns a hardware register based on the degree of the operation.
+    if (op_degree < 18) {
+        bool s0_base_condition = op_degree > 10;
+        bool t8_base_condition = !s0_base_condition && op_degree > 8;
+        bool t0_base_condition = !t8_base_condition;
+
+        usize t0_base_register_mask = scConditionBitmask(t0_base_condition);
+        usize t8_base_register_mask = scConditionBitmask(t8_base_condition);
+        usize s0_base_register_mask = scConditionBitmask(s0_base_condition);
+
+        state->op_register_assignments[op_index] = op_degree + ((8 & t0_base_register_mask) | (24 & t8_base_register_mask) | (16 & s0_base_register_mask));
+    } else {
+        u16 spilled_op_register = state->op_register_assignments[spilled_op];
+
+        state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[spilled_op], *state->stack_offset, 30);
+
+        state->op_register_assignments[op_index] = spilled_op_register;
+        state->op_register_assignments[spilled_op] = SC_VM_UNDEFINED_;
+        state->op_stack_assignments[spilled_op] = *state->stack_offset;
+
+        *state->stack_offset += 4;
+        *state->current_instruction += 1;
+    }
+
+    return state->op_register_assignments[op_index];
+}
+
 void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
     debugBlock(
+        debugAssert(block != NULL, "Block is null!", NULL);
         debugAssert(op_code_array_elements > 0, "No operations in block!", NULL);
     )
 
@@ -107,44 +166,71 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
     }
 
     u32 function_memory[256];
+    u16 op_register_assignments[op_code_array_elements];
+    u16 op_stack_assignments[op_code_array_elements];
+    u16 degree_operation_indices[op_code_array_elements];
+
+    memset(op_register_assignments, SC_VM_UNDEFINED_, sizeof(op_register_assignments));
+    memset(op_stack_assignments, SC_VM_UNDEFINED_, sizeof(op_stack_assignments));
+    memset(degree_operation_indices, SC_VM_UNDEFINED_, sizeof(degree_operation_indices));
+
     usize current_instruction = 0;
+    usize stack_offset = 0;
+
+    VmCompileState compile_state = {
+        .function_memory = function_memory,
+        .op_register_assignments = op_register_assignments,
+        .op_stack_assignments = op_stack_assignments,
+        .stack_offset = &stack_offset,
+        .current_instruction = &current_instruction,
+    };
 
     for (usize current_op = 0; current_op < op_code_array_elements && current_instruction < 256; current_op += 1) {
-        u16 op_used = op_reordered_array[current_op];
-        u16 op_degree = op_degree_array[op_used];
+        u16 op_block_index = op_reordered_array[current_op];
+        u16 op_degree = op_degree_array[op_block_index];
 
-        u16 op_use_array_offset = block->op_use_arrays[op_used];
+        u16 op_use_array_offset = block->op_use_arrays[op_block_index];
         u16 *op_use_array = block->use_array + op_use_array_offset;
 
-        u16 op_const_array_offset = block->op_const_arrays[op_used];
+        u16 op_const_array_offset = block->op_const_arrays[op_block_index];
         u32 *op_const_array = block->const_array + op_const_array_offset;
 
-        switch (block->op_code_array[op_used]) {
+        degree_operation_indices[op_degree] = op_block_index;
+
+        switch (block->op_code_array[op_block_index]) {
             case SCIR_OP_CODE_LOADIMM: {
                 u32 op_const = op_const_array[0];
+                u16 op_register = vmCompileOpRegisterFetch(
+                    &compile_state,
+                    op_block_index, 
+                    op_degree, 
+                    degree_operation_indices[0]
+                );
                 sc_printf("loadimm %zd, %d\n", current_op, op_const);
 
                 function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
-                function_memory[current_instruction + 1] = emitMipsORI(op_degree + 8, 1, op_const & 0xFFFF);
+                function_memory[current_instruction + 1] = emitMipsORI(op_register, 1, op_const & 0xFFFF);
                 current_instruction += 2;
                 break;
             }
             case SCIR_OP_CODE_STORE: {
-                u16 op_use = op_use_array[0];
                 u32 op_const = op_const_array[0];
+                u16 op_register = vmCompileOpRegisterFetch(&compile_state, op_block_index, op_degree, degree_operation_indices[0]);
                 sc_printf("store %zd, %p\n", current_op, (void*)(uptr)op_const);
 
                 function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
                 function_memory[current_instruction + 1] = emitMipsORI(1, 1, op_const & 0xFFFF);
-                function_memory[current_instruction + 2] = emitMipsSW(op_degree_array[op_use] + 8, 0, 1);
+                function_memory[current_instruction + 2] = emitMipsSW(op_register, 0, 1);
                 current_instruction += 3;
                 break;
             }
             case SCIR_OP_CODE_ADDI: {
-                u16 op_uses[2] = {op_use_array[0], op_use_array[1]};
-                sc_printf("addi %zd, %d, %d\n", current_op, op_index_order_array[op_uses[0]], op_index_order_array[op_uses[1]]);
+                u16 op_use_register0 = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], op_register_assignments[degree_operation_indices[0]]);
+                u16 op_use_register1 = vmCompileUseRegisterFetch(&compile_state, op_use_array[1], op_register_assignments[degree_operation_indices[1]]);
+                u16 op_register = vmCompileOpRegisterFetch(&compile_state,op_block_index, op_degree, degree_operation_indices[2]);
+                sc_printf("addi %zd, %d, %d\n", current_op, op_index_order_array[op_use_array[0]], op_index_order_array[op_use_array[1]]);
 
-                function_memory[current_instruction] = emitMipsADD(op_degree + 8, op_degree_array[op_uses[0]] + 8, op_degree_array[op_uses[1]] + 8);
+                function_memory[current_instruction] = emitMipsADD(op_register, op_use_register0, op_use_register1);
                 current_instruction += 1;
                 break;
             }
@@ -153,6 +239,12 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
 
     function_memory[current_instruction] = emitMipsJR(31);
     function_memory[current_instruction + 1] = 0;
+
+    current_instruction += 2;
+
+    for (usize i = 0; i < current_instruction; i += 1) {
+        sc_printf("[%3zd]: %08x\n", i, function_memory[i]);
+    }
 
     #ifdef SC_PLATFORM_PSP_OPTION_
 
