@@ -118,7 +118,6 @@ static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_
         usize s0_base_register_mask = scConditionBitmask(s0_base_condition);
 
         state->op_register_assignments[op_index] = op_degree + ((8 & t0_base_register_mask) | (16 & t8_base_register_mask) | (6 & s0_base_register_mask));
-        sc_printf("Op assignment %d\n", state->op_register_assignments[op_index]);
 
         if (s0_base_condition) {
             state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[op_index], *state->stack_offset, 30);
