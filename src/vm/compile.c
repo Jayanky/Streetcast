@@ -36,7 +36,7 @@ static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_ordered_index_
         op_highest_dependent_array[op_use_array[i]] = op_code_last_index;
 
         // Only assign a location if op has not already been located.
-        if (op_ordered_index_array[op_use_array[i]] != (u16)-1) {
+        if (op_ordered_index_array[op_use_array[i]] != SC_VM_UNDEFINED_) {
             continue;
         }
 
@@ -60,7 +60,7 @@ static void vmCompileDegreeCalculate(u16 *op_degree_array, u16 *op_index_order_a
         u16 current_op_degree = op_degree_array[current_op];
         u16 compare_op_initial = op_highest_dependent_array[current_op];
 
-        if (compare_op_initial == (u16)-1) {
+        if (compare_op_initial == SC_VM_UNDEFINED_) {
             compare_op_initial = op_code_array_elements - 1;
         }
 
@@ -84,8 +84,8 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
     u16 op_highest_dependent_array[op_code_array_elements];
     u16 op_degree_array[op_code_array_elements];
     
-    memset(op_index_order_array, -1, sizeof(op_index_order_array));
-    memset(op_highest_dependent_array, -1, sizeof(op_highest_dependent_array));
+    memset(op_index_order_array, SC_VM_UNDEFINED_, sizeof(op_index_order_array));
+    memset(op_highest_dependent_array, SC_VM_UNDEFINED_, sizeof(op_highest_dependent_array));
     memset(op_degree_array, 0, sizeof(op_degree_array));
 
     vmCompileScirBlockOpReorder(block, op_index_order_array, op_highest_dependent_array, op_code_array_elements - 1, &(u16){0});
