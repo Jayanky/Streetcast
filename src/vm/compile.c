@@ -31,7 +31,6 @@ static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_ordered_index_
     u16 op_use_count = block->op_use_array_elements[op_code_last_index];
     u16 op_use_offset = block->op_use_arrays[op_code_last_index];
     u16 *op_use_array = &block->use_array[op_use_offset];
-    u16 use_use_count = 0;
 
     for (usize i = 0; i < op_use_count; i += 1) {
         op_highest_dependent_array[op_use_array[i]] = op_code_last_index;
