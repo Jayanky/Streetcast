@@ -112,7 +112,6 @@ int main() {
     u16 op46 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op45, op8}, 2, NULL, 0);
 
     u16 op47 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op46}, 1, (u32[]){(usize)main_dreamcast_memory}, 1);
-
     
     vmCompileScirBlock(&scir_block, scir_state.op_code_array_position);
 
