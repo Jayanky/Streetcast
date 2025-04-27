@@ -46,7 +46,7 @@ target_sources(${CMAKE_PROJECT_NAME}
 )
 
 target_compile_options(${CMAKE_PROJECT_NAME}
-    PRIVATE -std=c11 -Wextra -Werror -finline-functions
+    PRIVATE -std=c11 -Wextra -Werror
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME}
@@ -60,7 +60,7 @@ target_compile_definitions(${CMAKE_PROJECT_NAME}
     SC_SCIR_BLOCK_MAX_CONSTS_INT_=${SC_SCIR_BLOCK_MAX_CONSTS}
 )
 
-if(NOT SC_RELEASE)
+if(SC_RELEASE)
     target_compile_definitions(${CMAKE_PROJECT_NAME}
         PRIVATE
         SC_DEBUG_BOOL_OPTION_
