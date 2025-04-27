@@ -36,23 +36,61 @@ static inline void vmCompileExecutableSet(uptr address_start, uptr address_end) 
     }
 }
 
-static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_ordered_index_array, u16 *op_highest_dependent_array, u16 op_code_last_index, u16 *op_code_order_start) {
+static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_index_order_array, u16 *op_highest_dependent_array, u16 op_code_last_index, u16 *op_code_order_start) {
     u16 op_use_count = block->op_use_array_elements[op_code_last_index];
     u16 op_use_offset = block->op_use_arrays[op_code_last_index];
     u16 *op_use_array = &block->use_array[op_use_offset];
 
-    for (usize i = 0; i < op_use_count; i += 1) {
-        op_highest_dependent_array[op_use_array[i]] = op_code_last_index;
+    if (op_use_count > 0) {
+        u16 sorted_op_uses[op_use_count];
 
-        // Only assign a location if op has not already been located.
-        if (op_ordered_index_array[op_use_array[i]] != SC_VM_UNDEFINED_) {
-            continue;
+        memset(sorted_op_uses, SC_VM_UNDEFINED_, sizeof(sorted_op_uses));
+
+        switch (op_use_count) {
+            case 0: break;
+            case 1: {
+                sorted_op_uses[0] = op_use_array[0];
+                break;
+            }
+            case 2: {
+                if (op_use_array[0] > op_use_array[1]) {
+                    sorted_op_uses[0] = op_use_array[1];
+                    sorted_op_uses[1] = op_use_array[0];
+                } else {
+                    sorted_op_uses[0] = op_use_array[0];
+                    sorted_op_uses[1] = op_use_array[1];
+                }
+                break;
+            }
+            default: {
+                sorted_op_uses[0] = op_use_array[0];
+
+                for (usize i = 1; i < op_use_count; i += 1) {
+                    u16 current_use = op_use_array[i];
+                    
+                    for (usize j = i; j > 0; j -= 1) {
+                        if (sorted_op_uses[j - 1] >= current_use) {
+                            sorted_op_uses[j] = sorted_op_uses[j - 1];
+                        } else {
+                            sorted_op_uses[j] = current_use;
+                        }
+                    }
+                }
+            }
         }
 
-        vmCompileScirBlockOpReorder(block, op_ordered_index_array, op_highest_dependent_array, op_use_array[i], op_code_order_start);
+        for (usize i = 0; i < op_use_count; i += 1) {
+            op_highest_dependent_array[sorted_op_uses[i]] = op_code_last_index;
+            // Only assign a location if op has not already been located.
+            if (op_index_order_array[sorted_op_uses[i]] != SC_VM_UNDEFINED_) {
+                continue;
+            }
+
+            vmCompileScirBlockOpReorder(block, op_index_order_array, op_highest_dependent_array, sorted_op_uses[i], op_code_order_start);
+        }
     }
 
-    op_ordered_index_array[op_code_last_index] = *op_code_order_start;
+    op_index_order_array[op_code_last_index] = *op_code_order_start;
     *op_code_order_start += 1;
 }
 
