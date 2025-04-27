@@ -147,17 +147,15 @@ static u16 vmCompileUseRegisterFetch(VmCompileState *state, u16 use_op_index, u1
 static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_degree, u16 spilled_op) {
     // Assigns a hardware register based on the degree of the operation.
     if (op_degree < 18) {
-        bool s0_base_condition = op_degree >= 10;
-        bool t8_base_condition = !s0_base_condition && op_degree >= 8;
-        bool t0_base_condition = !t8_base_condition;
+        if (op_degree < 8) {
+            state->op_register_assignments[op_index] = op_degree + 8;
+        } else if (op_degree < 10) {
+            state->op_register_assignments[op_index] = op_degree + 16;
+        } else {
+            state->op_register_assignments[op_index] = op_degree + 6;
+        }
 
-        usize t0_base_register_mask = scConditionBitmask(t0_base_condition);
-        usize t8_base_register_mask = scConditionBitmask(t8_base_condition);
-        usize s0_base_register_mask = scConditionBitmask(s0_base_condition);
-
-        state->op_register_assignments[op_index] = op_degree + ((8 & t0_base_register_mask) | (16 & t8_base_register_mask) | (6 & s0_base_register_mask));
-
-        if (s0_base_condition) {
+        if (op_degree >= 10) {
             state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[op_index], *state->stack_offset, 30);
             state->save_register_stack_assignments[state->op_register_assignments[op_index] - 16] = *state->stack_offset;
             *state->stack_offset += 4;
@@ -205,7 +203,7 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
     sc_printf("Degrees:\n");
     for (usize i = 0; i < op_code_array_elements; ++i) {
         sc_printf("[%3d]:", op_reordered_array[i]);
-        for (usize j = 0; j < op_degree_array[op_reordered_array[i]]; ++j) {
+        for (usize j = 0; j < op_degree_array[op_reordered_array[i]] && j < 20; ++j) {
             sc_printf("-");
         }
         sc_printf("%d\n", op_degree_array[op_reordered_array[i]]);
@@ -252,17 +250,21 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
             case SCIR_OP_CODE_LOADIMM: {
                 u32 op_const = op_const_array[0];
                 u16 op_register = vmCompileOpRegisterFetch(&compile_state, op_block_index, op_degree, degree_operation_indices[0]);
-                sc_printf("loadimm %zd, %d\n", current_op, op_const);
 
-                function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
-                function_memory[current_instruction + 1] = emitMipsORI(op_register, 1, op_const & 0xFFFF);
-                current_instruction += 2;
+                if (op_const <= 0xFFFF) {
+                    function_memory[current_instruction] = emitMipsORI(op_register, 0, op_const);
+                    current_instruction += 1;
+                } else {
+                    function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
+                    function_memory[current_instruction + 1] = emitMipsORI(op_register, 1, op_const);
+                    current_instruction += 2;                    
+                }
+
                 break;
             }
             case SCIR_OP_CODE_STORE: {
                 u32 op_const = op_const_array[0];
                 u16 op_use_register = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], degree_operation_indices[0]);
-                sc_printf("store %d, %p\n", op_index_order_array[op_use_array[0]], (void*)(uptr)op_const);
 
                 function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
                 function_memory[current_instruction + 1] = emitMipsORI(1, 1, op_const & 0xFFFF);
@@ -274,7 +276,6 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
                 u16 op_use_register0 = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], op_register_assignments[degree_operation_indices[0]]);
                 u16 op_use_register1 = vmCompileUseRegisterFetch(&compile_state, op_use_array[1], op_register_assignments[degree_operation_indices[1]]);
                 u16 op_register = vmCompileOpRegisterFetch(&compile_state,op_block_index, op_degree, degree_operation_indices[2]);
-                sc_printf("addi %zd, %d, %d\n", current_op, op_index_order_array[op_use_array[0]], op_index_order_array[op_use_array[1]]);
 
                 function_memory[current_instruction] = emitMipsADD(op_register, op_use_register0, op_use_register1);
                 current_instruction += 1;
@@ -284,10 +285,11 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
     }
 
     // Restore callee save registers if any were used.
-    for (usize i = 0, instruction_count = 0; i < save_register_count; i += 1) {
+    for (usize i = 0; i < save_register_count; i += 1) {
         u16 stack_assignment = save_register_stack_assignments[i];
         if (stack_assignment != SC_VM_UNDEFINED_) {
-            function_memory[current_instruction + instruction_count] = emitMipsLW(16 + i, stack_assignment, 30);
+            function_memory[current_instruction] = emitMipsLW(16 + i, stack_assignment, 30);
+            current_instruction += 1;
         }
     }
 
