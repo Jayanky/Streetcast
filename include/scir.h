@@ -13,7 +13,7 @@ typedef enum {
 
 typedef enum {
     SCIR_OP_CODE_LOAD,
-    SCIR_OP_CODE_LOADIMM,
+    SCIR_OP_CODE_LOADIMMI,
     SCIR_OP_CODE_LINKOUT,
     SCIR_OP_CODE_LINKIN,
     SCIR_OP_CODE_STORE,
