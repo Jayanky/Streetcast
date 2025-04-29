@@ -71,7 +71,7 @@ static inline u16 scirBlockOpAppendAddi(ScirBlockAppendState *state, u16 op0, u1
     return scirBlockOpAppend(state, SCIR_OP_CODE_ADDI, (u16[]){op0, op1}, 2, NULL, 0);
 }
 
-static inline u16 scirBlockOpAppendAddimmi(ScirBlockAppendState *state, u16 op0, u32 immediate) {
+static inline u16 scirBlockOpAppendAddimmi(ScirBlockAppendState *state, u16 op0, i32 immediate) {
     return scirBlockOpAppend(state, SCIR_OP_CODE_ADDIMMI, (u16[]){op0}, 1, (u32[]){immediate}, 1);
 }
 
