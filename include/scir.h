@@ -79,8 +79,8 @@ static inline u16 scirBlockOpAppendLoadimmi(ScirBlockAppendState *state, u32 imm
     return scirBlockOpAppend(state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){immediate}, 1);
 }
 
-static inline u16 scirBlockOpAppendStore(ScirBlockAppendState *state, u16 op0, void *address) {
-    return scirBlockOpAppend(state, SCIR_OP_CODE_STORE, (u16[]){op0}, 1, (u32[]){(uptr)address}, 1);
+static inline u16 scirBlockOpAppendStore(ScirBlockAppendState *state, u16 op0, u16 op1, i32 offset) {
+    return scirBlockOpAppend(state, SCIR_OP_CODE_STORE, (u16[]){op0, op1}, 2, (u32[]){offset}, 1);
 }
 
 #endif

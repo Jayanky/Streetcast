@@ -282,17 +282,23 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
             }
             case SCIR_OP_CODE_STORE: {
                 u32 op_const = op_const_array[0];
-                u16 op_use_register = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], degree_operation_indices[0]);
+                u16 op_use_register0 = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], degree_operation_indices[0]);
+                u16 op_use_register1 = vmCompileUseRegisterFetch(&compile_state, op_use_array[1], degree_operation_indices[1]);
 
-                function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
-                function_memory[current_instruction + 1] = emitMipsORI(1, 1, op_const & 0xFFFF);
-                function_memory[current_instruction + 2] = emitMipsSW(op_use_register, 0, 1);
-                current_instruction += 3;
+                if (op_const <= 0xFFFF) {
+                    function_memory[current_instruction] = emitMipsSW(op_use_register0, op_const, op_use_register1);
+                    current_instruction += 1;
+                } else {
+                    function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
+                    function_memory[current_instruction + 1] = emitMipsADD(1, 1, op_use_register1);
+                    function_memory[current_instruction + 2] = emitMipsSW(op_use_register0, op_const, 1);
+                    current_instruction += 3;
+                }
                 break;
             }
             case SCIR_OP_CODE_ADDI: {
-                u16 op_use_register0 = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], op_register_assignments[degree_operation_indices[0]]);
-                u16 op_use_register1 = vmCompileUseRegisterFetch(&compile_state, op_use_array[1], op_register_assignments[degree_operation_indices[1]]);
+                u16 op_use_register0 = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], degree_operation_indices[0]);
+                u16 op_use_register1 = vmCompileUseRegisterFetch(&compile_state, op_use_array[1], degree_operation_indices[1]);
                 u16 op_register = vmCompileOpRegisterFetch(&compile_state,op_block_index, op_degree, degree_operation_indices[2]);
 
                 function_memory[current_instruction] = emitMipsADD(op_register, op_use_register0, op_use_register1);
