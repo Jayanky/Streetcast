@@ -66,7 +66,8 @@ int main() {
     u16 op9 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
     u16 op10 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
 
-    u16 op47 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op10, op9, op8, op7, op6, op5, op4, op3, op2, op1, op0}, 11, (u32[]){(uptr)main_dreamcast_memory}, 1);
+    u16 op11 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op10, op9, op8, op7, op6, op5, op4, op3, op2, op1, op0}, 11, NULL, 0);
+    u16 op12 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op11}, 1, (u32[]){(uptr)main_dreamcast_memory}, 1);
     
     vmCompileScirBlock(&scir_block, scir_state.op_code_array_position);
 
