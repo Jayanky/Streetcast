@@ -53,23 +53,11 @@ int main() {
     ScirBlock scir_block = scirBlockAllocate(&scir_block_buffer, SC_SCIR_BLOCK_MAX_OPS_INT_, SC_SCIR_BLOCK_MAX_USES_INT_, SC_SCIR_BLOCK_MAX_CONSTS_INT_);
     ScirBlockAppendState scir_state = scirBlockAppendStateBind(&scir_block);
 
-    // Intentionally overloading the register allocator
     u16 op0 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){25}, 1);
     u16 op1 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op3 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op4 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op5 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op6 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op7 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op8 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op9 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op10 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-    u16 op11 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
-
-
-    u16 op12 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op11, op10, op9, op8, op7, op6, op5, op4, op3, op2, op1, op0}, 12, NULL, 0);
-    u16 op13 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op12}, 1, (u32[]){(uptr)main_dreamcast_memory}, 1);
+    u16 op2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDIMMI, (u16[]){op0}, 1, (u32[]){50}, 1);
+    u16 op3 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op1}, 2, NULL, 0);
+    u16 op4 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op3}, 1, (u32[]){(uptr)main_dreamcast_memory}, 1);
     
     vmCompileScirBlock(&scir_block, scir_state.op_code_array_position);
 
