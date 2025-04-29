@@ -36,6 +36,12 @@ static inline void vmCompileExecutableSet(uptr address_start, uptr address_end) 
     }
 }
 
+/*
+    Calculate the order that each operation in `block` should be executed in machine code, and place the result in `op_index_order_array`.
+    `op_highest_dependent_array` is the last operation that depends on a given operation.
+    `op_code_last_index` points to the last instruction of the block.
+    `op_code_order_start` is the first index that will be assigned in the order array (set to 0).
+*/
 static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_index_order_array, u16 *op_highest_dependent_array, u16 op_code_last_index, u16 *op_code_order_start) {
     u16 op_use_count = block->op_use_array_elements[op_code_last_index];
     u16 op_use_offset = block->op_use_arrays[op_code_last_index];
@@ -69,10 +75,11 @@ static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_index_order_ar
                     u16 current_use = op_use_array[i];
                     
                     for (usize j = i; j > 0; j -= 1) {
-                        if (sorted_op_uses[j - 1] >= current_use) {
-                            sorted_op_uses[j] = sorted_op_uses[j - 1];
+                        if (sorted_op_uses[j - 1] < current_use) {
+                            break;
                         } else {
-                            sorted_op_uses[j] = current_use;
+                            sorted_op_uses[j] = sorted_op_uses[j - 1];
+                            sorted_op_uses[j - 1] = current_use;
                         }
                     }
                 }
@@ -94,6 +101,12 @@ static void vmCompileScirBlockOpReorder(ScirBlock *block, u16 *op_index_order_ar
     *op_code_order_start += 1;
 }
 
+/*
+    Calculate the degree (a unique position specifier) of each operation and place the result in `op_degree_array`.
+    `op_index_order_array` contains the placement of each operation in the finish machine code.
+    `op_highest_dependent_array` holds the last time each operation is used.
+    `op_code_array_elements` is the number of operations in the block.
+*/
 static void vmCompileDegreeCalculate(u16 *op_degree_array, u16 *op_index_order_array, u16 *op_highest_dependent_array, u16 op_code_array_elements) {
     u16 op_reordered_array[op_code_array_elements];
 
@@ -122,6 +135,9 @@ static void vmCompileDegreeCalculate(u16 *op_degree_array, u16 *op_index_order_a
     }
 }
 
+/*
+    Obtain a register index based on the `use_op_index`, and spill the operation at `spill_op_index` if use operation is on the stack.
+*/
 static u16 vmCompileUseRegisterFetch(VmCompileState *state, u16 use_op_index, u16 spilled_op_index) {
     u16 op_register_assignment = state->op_register_assignments[use_op_index];
 
@@ -144,6 +160,9 @@ static u16 vmCompileUseRegisterFetch(VmCompileState *state, u16 use_op_index, u1
     }
 }
 
+/*
+    Obtain a register index based on `op_index` and `op_degree`, and spill `spilled_op` if no space is available.
+*/
 static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_degree, u16 spilled_op) {
     // Assigns a hardware register based on the degree of the operation.
     if (op_degree < 18) {
@@ -247,7 +266,7 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
         degree_operation_indices[op_degree] = op_block_index;
 
         switch (block->op_code_array[op_block_index]) {
-            case SCIR_OP_CODE_LOADIMM: {
+            case SCIR_OP_CODE_LOADIMMI: {
                 u32 op_const = op_const_array[0];
                 u16 op_register = vmCompileOpRegisterFetch(&compile_state, op_block_index, op_degree, degree_operation_indices[0]);
 

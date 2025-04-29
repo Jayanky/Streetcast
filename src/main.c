@@ -54,64 +54,19 @@ int main() {
     ScirBlockAppendState scir_state = scirBlockAppendStateBind(&scir_block);
 
     // Intentionally overloading the register allocator
-    u16 op0 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMM, NULL, 0, (u32[]){25}, 1);
-    u16 op1 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMM, NULL, 0, (u32[]){44}, 1);
+    u16 op0 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){25}, 1);
+    u16 op1 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op3 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op4 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op5 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op6 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op7 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op8 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op9 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
+    u16 op10 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){44}, 1);
 
-    u16 op2 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op1}, 2, NULL, 0);
-
-    u16 op3 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op2}, 2, NULL, 0);
-    u16 op4 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op3}, 2, NULL, 0);
-
-    u16 op5 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op4}, 2, NULL, 0);
-    u16 op6 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op5}, 2, NULL, 0);
-    u16 op7 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op6}, 2, NULL, 0);
-
-    u16 op8  = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op7 }, 2, NULL, 0);
-    u16 op9  = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op8 }, 2, NULL, 0);
-    u16 op10 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op9 }, 2, NULL, 0);
-    u16 op11 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op3, op10}, 3, NULL, 0);
-
-    u16 op12 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op11}, 2, NULL, 0);
-    u16 op13 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op12}, 2, NULL, 0);
-    u16 op14 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op13}, 2, NULL, 0);
-    u16 op15 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op3, op14}, 2, NULL, 0);
-    u16 op16 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op4, op15}, 2, NULL, 0);
-
-    u16 op17 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op16}, 2, NULL, 0);
-    u16 op18 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op17}, 2, NULL, 0);
-    u16 op19 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op18}, 2, NULL, 0);
-    u16 op20 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op3, op19}, 2, NULL, 0);
-    u16 op21 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op4, op20}, 2, NULL, 0);
-    u16 op22 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op5, op21}, 2, NULL, 0);
-
-    u16 op23 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op22}, 2, NULL, 0);
-    u16 op24 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op23}, 2, NULL, 0);
-    u16 op25 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op24}, 2, NULL, 0);
-    u16 op26 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op3, op25}, 2, NULL, 0);
-    u16 op27 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op4, op26}, 2, NULL, 0);
-    u16 op28 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op5, op27}, 2, NULL, 0);
-    u16 op29 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op6, op28}, 2, NULL, 0);
-
-    u16 op30 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op0, op29}, 2, NULL, 0);
-    u16 op31 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op1, op30}, 2, NULL, 0);
-    u16 op32 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op2, op31}, 2, NULL, 0);
-    u16 op33 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op3, op32}, 2, NULL, 0);
-    u16 op34 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op4, op33}, 2, NULL, 0);
-    u16 op35 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op5, op34}, 2, NULL, 0);
-    u16 op36 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op6, op35}, 2, NULL, 0);
-    u16 op37 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op7, op36}, 2, NULL, 0);
-
-    u16 op38 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op37, op0}, 2, NULL, 0);
-    u16 op39 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op38, op1}, 2, NULL, 0);
-    u16 op40 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op39, op2}, 2, NULL, 0);
-    u16 op41 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op40, op3}, 2, NULL, 0);
-    u16 op42 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op41, op4}, 2, NULL, 0);
-    u16 op43 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op42, op5}, 2, NULL, 0);
-    u16 op44 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op43, op6}, 2, NULL, 0);
-    u16 op45 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op44, op7}, 2, NULL, 0);
-    u16 op46 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_ADDI, (u16[]){op45, op8}, 2, NULL, 0);
-
-    u16 op47 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op46}, 1, (u32[]){(usize)main_dreamcast_memory}, 1);
+    u16 op47 = scirBlockOpAppend(&scir_state, SCIR_OP_CODE_STORE, (u16[]){op10, op9, op8, op7, op6, op5, op4, op3, op2, op1, op0}, 11, (u32[]){(usize)main_dreamcast_memory}, 1);
     
     vmCompileScirBlock(&scir_block, scir_state.op_code_array_position);
 
