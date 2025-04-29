@@ -278,7 +278,6 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
                     function_memory[current_instruction + 1] = emitMipsORI(op_register, 1, op_const);
                     current_instruction += 2;                    
                 }
-
                 break;
             }
             case SCIR_OP_CODE_STORE: {
@@ -298,6 +297,22 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
 
                 function_memory[current_instruction] = emitMipsADD(op_register, op_use_register0, op_use_register1);
                 current_instruction += 1;
+                break;
+            }
+            case SCIR_OP_CODE_ADDIMMI: {
+                u32 op_const = op_const_array[0];
+                u16 op_use_register = vmCompileUseRegisterFetch(&compile_state, op_use_array[0], op_register_assignments[degree_operation_indices[0]]);
+                u16 op_register = vmCompileOpRegisterFetch(&compile_state, op_block_index, op_degree, degree_operation_indices[1]);
+
+                if (op_const <= 0xFFFF) {
+                    function_memory[current_instruction] = emitMipsADDI(op_register, op_use_register, op_const);
+                    current_instruction += 1;
+                } else {
+                    function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
+                    function_memory[current_instruction + 1] = emitMipsORI(1, 1, op_const);
+                    function_memory[current_instruction + 2] = emitMipsADD(op_register, op_use_register, 1);
+                    current_instruction += 3;
+                }
                 break;
             }
         }
