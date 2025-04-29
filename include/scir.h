@@ -67,9 +67,20 @@ ScirBlock scirBlockAllocate(AllocateBuffer *buffer, usize op_array_max_elements,
 */
 u16 scirBlockOpAppend(ScirBlockAppendState *state, ScirOpCode code, u16 *use_array, u16 use_array_elements, u32 *const_array, u16 const_array_elements);
 
-/*
-    Append `const_array_elements` elements in `const_array` to the block bound to `state`.
-*/
-u16 scirBlockConstAppend(ScirBlockAppendState *state, u32 *const_array, u16 const_array_elements);
+static inline u16 scirBlockOpAppendAddi(ScirBlockAppendState *state, u16 op0, u16 op1) {
+    return scirBlockOpAppend(state, SCIR_OP_CODE_ADDI, (u16[]){op0, op1}, 2, NULL, 0);
+}
+
+static inline u16 scirBlockOpAppendAddimmi(ScirBlockAppendState *state, u16 op0, u32 immediate) {
+    return scirBlockOpAppend(state, SCIR_OP_CODE_ADDIMMI, (u16[]){op0}, 1, (u32[]){immediate}, 1);
+}
+
+static inline u16 scirBlockOpAppendLoadimmi(ScirBlockAppendState *state, u32 immediate) {
+    return scirBlockOpAppend(state, SCIR_OP_CODE_LOADIMMI, NULL, 0, (u32[]){immediate}, 1);
+}
+
+static inline u16 scirBlockOpAppendStore(ScirBlockAppendState *state, u16 op0, void *address) {
+    return scirBlockOpAppend(state, SCIR_OP_CODE_STORE, (u16[]){op0}, 1, (u32[]){(uptr)address}, 1);
+}
 
 #endif
