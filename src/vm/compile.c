@@ -175,7 +175,7 @@ static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_
         }
 
         if (op_degree >= 10) {
-            state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[op_index], *state->stack_offset, 30);
+            state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[op_index], -*state->stack_offset, 30);
             state->save_register_stack_assignments[state->op_register_assignments[op_index] - 16] = *state->stack_offset;
             *state->stack_offset += 4;
             *state->current_instruction += 1;
@@ -183,7 +183,7 @@ static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_
     } else {
         u16 spilled_op_register = state->op_register_assignments[spilled_op];
 
-        state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[spilled_op], *state->stack_offset, 30);
+        state->function_memory[*state->current_instruction] = emitMipsSW(state->op_register_assignments[spilled_op], -*state->stack_offset, 30);
 
         state->op_register_assignments[op_index] = spilled_op_register;
         state->op_register_assignments[spilled_op] = SC_VM_UNDEFINED_;
@@ -307,7 +307,7 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
     for (usize i = 0; i < save_register_count; i += 1) {
         u16 stack_assignment = save_register_stack_assignments[i];
         if (stack_assignment != SC_VM_UNDEFINED_) {
-            function_memory[current_instruction] = emitMipsLW(16 + i, stack_assignment, 30);
+            function_memory[current_instruction] = emitMipsLW(16 + i, -stack_assignment, 30);
             current_instruction += 1;
         }
     }
