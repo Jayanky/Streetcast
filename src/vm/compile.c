@@ -290,7 +290,7 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
                     current_instruction += 1;
                 } else {
                     function_memory[current_instruction] = emitMipsLUI(1, op_const >> 16);
-                    function_memory[current_instruction + 1] = emitMipsADD(1, 1, op_use_register1);
+                    function_memory[current_instruction + 1] = emitMipsADDU(1, 1, op_use_register1);
                     function_memory[current_instruction + 2] = emitMipsSW(op_use_register0, op_const, 1);
                     current_instruction += 3;
                 }
