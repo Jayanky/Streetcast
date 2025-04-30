@@ -219,13 +219,13 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
         op_reordered_array[op_index_order_array[i]] = i;
     }
 
-    sc_printf("Degrees:\n");
+    scPrintf("Degrees:\n");
     for (usize i = 0; i < op_code_array_elements; ++i) {
-        sc_printf("[%3d]:", op_reordered_array[i]);
+        scPrintf("[%3d]:", op_reordered_array[i]);
         for (usize j = 0; j < op_degree_array[op_reordered_array[i]] && j < 20; ++j) {
-            sc_printf("-");
+            scPrintf("-");
         }
-        sc_printf("%d\n", op_degree_array[op_reordered_array[i]]);
+        scPrintf("%d\n", op_degree_array[op_reordered_array[i]]);
     }
 
     const usize save_register_count = 8;

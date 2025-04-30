@@ -62,7 +62,7 @@ int main() {
     
     vmCompileScirBlock(&scir_block, scir_state.op_code_array_position);
 
-    sc_printf("main_dreamcast_memory[0]\n%d\n", ((u32*)main_dreamcast_memory)[0]);
+    scPrintf("main_dreamcast_memory[0]\n%d\n", ((u32*)main_dreamcast_memory)[0]);
 
     #ifdef SC_PLATFORM_PSP_OPTION_
 

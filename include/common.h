@@ -15,11 +15,11 @@
 #include <pspdebug.h>
 #include <pspdisplay.h>
 
-#define sc_printf pspDebugScreenPrintf
+#define scPrintf pspDebugScreenPrintf
 
 #else
 
-#define sc_printf printf
+#define scPrintf printf
 
 #endif
 
