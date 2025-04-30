@@ -69,25 +69,3 @@ u16 scirBlockOpAppend(ScirBlockAppendState *state, ScirOpCode code, u16 *use_arr
 
     return op_code_array_index;
 }
-
-u16 scirBlockConstAppend(ScirBlockAppendState *state, u32 *const_array, u16 const_array_elements) {
-    debugBlock(
-        debugAssert(state != NULL, "State is null!", NULL);
-        debugAssert(const_array != NULL, "Const array is null!", NULL);
-        debugAssert(state->block->const_array != NULL, "Block const array is null!", NULL);    
-    )
-
-    // Find how many elements in the pointer is.
-    const u16 op_code_array_index = state->op_code_array_position;
-    const u16 const_array_index = state->const_array_position;
-
-    // Copy const data from argument to block const array.
-    for (usize i = 0; i < const_array_elements; ++i) {
-        state->block->const_array[state->const_array_position] = const_array[i];
-    }
-
-    // Increment pointer to the next free position.
-    state->const_array_position += const_array_elements;
-
-    return const_array_index;
-}
