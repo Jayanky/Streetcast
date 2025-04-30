@@ -40,4 +40,6 @@ typedef uintmax_t usize;
 typedef intmax_t isize;
 typedef uintptr_t uptr;
 
+#define arrayelements(array) (sizeof((array)) / sizeof(*(array)))
+
 #endif
