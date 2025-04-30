@@ -59,7 +59,7 @@ int main() {
     u16 op4 = scirBlockOpAppendLoadimmi(&scir_block, (uptr)main_dreamcast_memory);
     u16 op5 = scirBlockOpAppendStore(&scir_block, op3, op4, 0);
     
-    vmCompileScirBlock(&scir_block, scir_block.op_code_array_elements);
+    vmCompileScirBlock(&scir_block);
 
     scPrintf("main_dreamcast_memory[0]\n%d\n", ((u32*)main_dreamcast_memory)[0]);
 

@@ -43,6 +43,8 @@ target_sources(${CMAKE_PROJECT_NAME}
     src/scir/block.c
     src/allocate/allocate.c
     src/vm/compile.c
+    src/call_convention/mips.c
+    src/compile/mips.c
 )
 
 target_compile_options(${CMAKE_PROJECT_NAME}

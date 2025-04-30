@@ -196,31 +196,31 @@ static u16 vmCompileOpRegisterFetch(VmCompileState *state, u16 op_index, u16 op_
     return state->op_register_assignments[op_index];
 }
 
-void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
+void vmCompileScirBlock(ScirBlock *block) {
     debugBlock(
         debugAssert(block != NULL, "Block is null!", NULL);
-        debugAssert(op_code_array_elements > 0, "No operations in block!", NULL);
+        debugAssert(block->op_code_array_elements > 0, "No operations in block!", NULL);
     )
 
-    u16 op_index_order_array[op_code_array_elements];
-    u16 op_highest_dependent_array[op_code_array_elements];
-    u16 op_degree_array[op_code_array_elements];
+    u16 op_index_order_array[block->op_code_array_elements];
+    u16 op_highest_dependent_array[block->op_code_array_elements];
+    u16 op_degree_array[block->op_code_array_elements];
     
     memset(op_index_order_array, SC_VM_UNDEFINED_, sizeof(op_index_order_array));
     memset(op_highest_dependent_array, SC_VM_UNDEFINED_, sizeof(op_highest_dependent_array));
     memset(op_degree_array, 0, sizeof(op_degree_array));
 
-    vmCompileScirBlockOpReorder(block, op_index_order_array, op_highest_dependent_array, op_code_array_elements - 1, &(u16){0});
-    vmCompileDegreeCalculate(op_degree_array, op_index_order_array, op_highest_dependent_array, op_code_array_elements);
+    vmCompileScirBlockOpReorder(block, op_index_order_array, op_highest_dependent_array, block->op_code_array_elements - 1, &(u16){0});
+    vmCompileDegreeCalculate(op_degree_array, op_index_order_array, op_highest_dependent_array, block->op_code_array_elements);
 
-    u16 op_reordered_array[op_code_array_elements];
+    u16 op_reordered_array[block->op_code_array_elements];
 
-    for (usize i = 0; i < op_code_array_elements; ++i) {
+    for (usize i = 0; i < block->op_code_array_elements; ++i) {
         op_reordered_array[op_index_order_array[i]] = i;
     }
 
     scPrintf("Degrees:\n");
-    for (usize i = 0; i < op_code_array_elements; ++i) {
+    for (usize i = 0; i < block->op_code_array_elements; ++i) {
         scPrintf("[%3d]:", op_reordered_array[i]);
         for (usize j = 0; j < op_degree_array[op_reordered_array[i]] && j < 20; ++j) {
             scPrintf("-");
@@ -231,10 +231,10 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
     const usize save_register_count = 8;
 
     u32 function_memory[256];
-    u16 op_register_assignments[op_code_array_elements];
-    u16 op_stack_assignments[op_code_array_elements];
+    u16 op_register_assignments[block->op_code_array_elements];
+    u16 op_stack_assignments[block->op_code_array_elements];
     u16 save_register_stack_assignments[save_register_count]; // $s0 through $s7 must be returned by the end of the function.
-    u16 degree_operation_indices[op_code_array_elements];
+    u16 degree_operation_indices[block->op_code_array_elements];
 
     memset(op_register_assignments, SC_VM_UNDEFINED_, sizeof(op_register_assignments));
     memset(op_stack_assignments, SC_VM_UNDEFINED_, sizeof(op_stack_assignments));
@@ -253,7 +253,7 @@ void vmCompileScirBlock(ScirBlock *block, u16 op_code_array_elements) {
         .current_instruction = &current_instruction,
     };
 
-    for (usize current_op = 0; current_op < op_code_array_elements && current_instruction < 256; current_op += 1) {
+    for (usize current_op = 0; current_op < block->op_code_array_elements && current_instruction < 256; current_op += 1) {
         u16 op_block_index = op_reordered_array[current_op];
         u16 op_degree = op_degree_array[op_block_index];
 
