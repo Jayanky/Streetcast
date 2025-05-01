@@ -29,7 +29,7 @@ static inline void vmCompileExecutableSet(uptr address_start, uptr address_end) 
     for (usize address = address_start; address < address_end; address += 64) {
         __asm__ volatile (
             "cache 0b11010, 0(%[address])\n" // Tertiary Cache Hit Writeback
-            "cache 0b01000, 0(%[address])\n" // Instruction Cache Store Tag
+            "cache 0b01000, 0(%[address])\n" // Instruction Cache Index Store Tag
             :
             : [address] "r" (address)
         );

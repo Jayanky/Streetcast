@@ -63,4 +63,6 @@ static inline u16 scirBlockOpAppendStore(ScirBlock *block, u16 op0, u16 op1, i32
     return scirBlockOpAppend(block, SCIR_OP_CODE_STORE, (u16[]){op0, op1}, 2, (u32[]){offset}, 1);
 }
 
+void scirBlockOrderFetch(ScirBlock *block, u16 *op_order_array);
+
 #endif

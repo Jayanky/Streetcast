@@ -51,11 +51,11 @@ u16 scirBlockOpAppend(ScirBlock *block, ScirOpCode code, u16 *use_array, u16 use
     block->op_const_array_elements[op_code_array_index] = const_array_elements;
 
     // Copy elements from use and const arguments to block use and const arrays.
-    for (usize i = 0; i < use_array_elements; ++i) {
+    for (usize i = 0; i < use_array_elements; i += 1) {
         block->use_array[block->use_array_elements + i] = use_array[i];
     }
 
-    for (usize i = 0; i < const_array_elements; ++i) {
+    for (usize i = 0; i < const_array_elements; i += 1) {
         block->const_array[block->const_array_elements + i] = const_array[i];
     }
 
@@ -63,7 +63,7 @@ u16 scirBlockOpAppend(ScirBlock *block, ScirOpCode code, u16 *use_array, u16 use
     block->op_code_array[op_code_array_index] = (u16)code;
 
     // Move pointers to the next free position.
-    block->op_code_array_elements++;
+    block->op_code_array_elements += 1;
     block->use_array_elements += use_array_elements;
     block->const_array_elements += const_array_elements;
 

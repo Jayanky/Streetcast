@@ -44,6 +44,7 @@ target_sources(${CMAKE_PROJECT_NAME}
     src/allocate/allocate.c
     src/vm/compile.c
     src/call_convention/mips.c
+    src/compile/compile.c
     src/compile/mips.c
 )
 

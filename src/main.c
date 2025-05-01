@@ -3,6 +3,7 @@
 #include <scir.h>
 #include <allocate.h>
 #include <vm.h>
+#include <compile.h>
 
 // We don't need malloc where we're going.
 static u8 main_dreamcast_memory[SC_DC_MEMORY_SIZE_INT_];     // 26 MiB, for emulated games
@@ -58,10 +59,16 @@ int main() {
     u16 op3 = scirBlockOpAppendAddi(&scir_block, op2, op1);
     u16 op4 = scirBlockOpAppendLoadimmi(&scir_block, (uptr)main_dreamcast_memory);
     u16 op5 = scirBlockOpAppendStore(&scir_block, op3, op4, 0);
+    // u16 op6 = scirBlockOpAppendStore(&scir_block, op2, op4, 4);
     
     vmCompileScirBlock(&scir_block);
 
     scPrintf("main_dreamcast_memory[0]\n%d\n", ((u32*)main_dreamcast_memory)[0]);
+
+    u16 op_ordered_array[scir_block.op_code_array_elements];
+    u16 op_ordered_degree_array[scir_block.op_code_array_elements];
+
+    compileScirInfoCalculate(&scir_block, op_ordered_array, op_ordered_degree_array);
 
     #ifdef SC_PLATFORM_PSP_OPTION_
 
