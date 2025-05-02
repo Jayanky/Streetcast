@@ -65,7 +65,6 @@ void compileScirBlockInfoCalculate(ScirBlock *block, u16 *out_op_ordered_array, 
 
         for (usize i = block->op_code_array_elements; i > 0; i -= 1) {
             if (op_order_index_array[i - 1] == (u16)-1) {
-                scPrintf("Recurse at %zd\n", i - 1);
                 compileScirInfoCalculateRecurse(block, i - 1, op_order_index_array, &op_order_index);
             }
         }        
