@@ -54,13 +54,11 @@ void compileScirBlockInfoCalculate(ScirBlock *block, u16 *out_op_ordered_array, 
         }
     }
 
-    const usize op_code_array_size = block->op_code_array_elements * sizeof(u16);
-
     // For each operation, gives the order that it should be executed.
-    u16 *op_order_index_array = alloca(op_code_array_size);
+    u16 *op_order_index_array = alloca(block->op_code_array_elements * sizeof(*op_order_index_array));
 
-    memset(op_order_index_array, -1,op_code_array_size);
-    memset(out_op_last_used_array, -1, op_code_array_size);
+    memset(op_order_index_array, -1, block->op_code_array_elements * sizeof(*op_order_index_array));
+    memset(out_op_last_used_array, -1, block->op_code_array_elements * sizeof(*out_op_last_used_array));
 
     {
         u16 op_order_index = 0;
