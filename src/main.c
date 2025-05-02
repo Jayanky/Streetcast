@@ -59,16 +59,29 @@ int main() {
     u16 op3 = scirBlockOpAppendAddi(&scir_block, op2, op1);
     u16 op4 = scirBlockOpAppendLoadimmi(&scir_block, (uptr)main_dreamcast_memory);
     u16 op5 = scirBlockOpAppendStore(&scir_block, op3, op4, 0);
-    // u16 op6 = scirBlockOpAppendStore(&scir_block, op2, op4, 4);
-    
-    vmCompileScirBlock(&scir_block);
+    u16 op6 = scirBlockOpAppendStore(&scir_block, op2, op4, 4); 
+       
+    //vmCompileScirBlock(&scir_block);
+//
+    //scPrintf("main_dreamcast_memory[0]\n%d\n", ((u32*)main_dreamcast_memory)[0]);
 
-    scPrintf("main_dreamcast_memory[0]\n%d\n", ((u32*)main_dreamcast_memory)[0]);
+    usize op_code_array_size = scir_block.op_code_array_elements * sizeof(*scir_block.op_code_array);
 
-    u16 op_ordered_array[scir_block.op_code_array_elements];
-    u16 op_ordered_degree_array[scir_block.op_code_array_elements];
+    u16 *op_ordered_array = alloca(op_code_array_size);
+    u16 *op_last_used_array = alloca(op_code_array_size);
 
-    compileScirInfoCalculate(&scir_block, op_ordered_array, op_ordered_degree_array);
+    compileScirBlockInfoCalculate(&scir_block, op_ordered_array, op_last_used_array);
+
+    u16 op_code_set_array[] = {
+        [SCIR_OP_CODE_ADDI] = 1,
+        [SCIR_OP_CODE_ADDIMMI] = 1,
+        [SCIR_OP_CODE_LOADIMMI] = 1,
+        [SCIR_OP_CODE_STORE] = 0,
+    };
+
+    u16 *op_degree_array = alloca(op_code_array_size);
+
+    compileScirBlockDegreeCalculate(&scir_block, op_ordered_array, op_last_used_array, op_code_set_array, op_degree_array);
 
     #ifdef SC_PLATFORM_PSP_OPTION_
 
