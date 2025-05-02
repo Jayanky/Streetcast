@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <alloca.h>
 
 #ifdef SC_PLATFORM_PSP_OPTION_
 
