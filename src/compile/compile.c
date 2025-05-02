@@ -88,8 +88,10 @@ void compileScirBlockInfoCalculate(ScirBlock *block, u16 *out_op_ordered_array, 
 }
 
 void compileScirBlockDegreeCalculate(ScirBlock *block, u16 *op_ordered_array, u16 *op_last_used_array, u16 *op_code_set_array, u16 *out_op_degree_array) {
+    // Start degree of zero.
     memset(out_op_degree_array, 0, block->op_code_array_elements * sizeof(*out_op_degree_array));
 
+    // For every operation between the current and last used op, bump if degree and set are equal to current op.
     for (usize i = 0; i < block->op_code_array_elements; i += 1) {
         u16 current_set = op_code_set_array[block->op_code_array[op_ordered_array[i]]];
         u16 current_degree = out_op_degree_array[i];
