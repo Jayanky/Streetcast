@@ -63,9 +63,9 @@ void compileScirBlockInfoCalculate(ScirBlock *block, u16 *out_op_ordered_array, 
     {
         u16 op_order_index = 0;
 
-        for (usize i = block->op_code_array_elements; i > 0; i -= 1) {
-            if (op_order_index_array[i - 1] == (u16)-1) {
-                compileScirInfoCalculateRecurse(block, i - 1, op_order_index_array, &op_order_index);
+        for (isize i = block->op_code_array_elements - 1; i >= 0; i -= 1) {
+            if (op_order_index_array[i] == (u16)-1) {
+                compileScirInfoCalculateRecurse(block, i, op_order_index_array, &op_order_index);
             }
         }        
     }   
