@@ -1,5 +1,6 @@
-#include <common.h>
 #include <scir.h>
+
+#include <common.h>
 #include <allocate.h>
 #include <debug.h>
 #include <defines.h>
