@@ -6,6 +6,11 @@
 
 typedef void (*CompileFunc)();
 
+typedef struct {
+    u32 instruction_count;
+    u16 stack_pointer_offset;
+} CompileState;
+
 /*
     For `block`:
     Get the ordering of instruction execution output to `out_op_order_index_array`.
